@@ -1,0 +1,524 @@
+/* Jawaban esai yang diketik (js/esai-ketik.js) dan tampilannya (js/esai-tampil.js). Warna dari Styles/modern.css. */
+
+#pnlSoal, .esai-pratinjau {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.esai-panel textarea, .esai-panel input, .esai-editor {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.esai-ketik {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--essay-text);
+    border-radius: 12px;
+    background: var(--essay-bg);
+    font-family: "Open Sans", "AZ Arab", sans-serif;
+}
+
+.esai-label {
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--essay-text);
+}
+
+.esai-pratinjau {
+    min-height: 56px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.esai-pratinjau.kosong {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 14px;
+}
+
+.esai-buka {
+    margin-top: 10px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.az-esai-baris {
+    min-height: 1.4em;
+    white-space: pre-wrap;
+    text-align: start;
+}
+
+.az-esai-rumus {
+    display: inline-block;
+    margin: 0 2px;
+    vertical-align: middle;
+}
+
+.az-esai-rumus-teks {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.esai-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    max-height: 72vh;
+    border-top: 2px solid var(--essay-text);
+    border-radius: 16px 16px 0 0;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .18);
+    font-family: "Open Sans", "AZ Arab", sans-serif;
+}
+
+.esai-panel.ciut .esai-panel-badan {
+    display: none;
+}
+
+.esai-panel-kepala {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.esai-panel-judul {
+    flex: 1 1 auto;
+    font-size: 15px;
+}
+
+.esai-hitung {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.esai-hitung.penuh {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.esai-panel-ciut, .esai-panel-selesai {
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.esai-panel-ciut {
+    border: 1px solid var(--border-strong);
+    background: var(--opt-bg);
+    color: var(--text);
+}
+
+.esai-panel-selesai {
+    border: 0;
+    background: var(--primary);
+    color: #fff;
+}
+
+/* Jawaban dan papan huruf digulir terpisah: saat papan Arab/aksara digulir, kotak jawaban tetap terlihat. */
+.esai-panel-badan {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.esai-panel-isi {
+    flex: 1 1 auto;
+    min-height: 56px;
+    padding: 10px 12px 4px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.esai-panel-badan.papan-terbuka .esai-panel-isi {
+    flex: 0 0 auto;
+    max-height: 28vh;
+}
+
+.esai-panel-alat {
+    flex: 0 0 auto;
+}
+
+.esai-editor {
+    position: relative;
+    min-height: 120px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--opt-bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    unicode-bidi: plaintext;
+    text-align: start;
+    outline: none;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.esai-editor:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.esai-editor.kosong::before {
+    content: attr(data-kosong);
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.esai-chip {
+    display: inline-block;
+    margin: 0 2px;
+    padding: 0 6px;
+    border: 1px solid var(--essay-text);
+    border-radius: 8px;
+    background: var(--essay-bg);
+    color: var(--text);
+    vertical-align: middle;
+    line-height: 1.4;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.esai-chip-teks {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.esai-rumus-dialog {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px 16px 0 0;
+    background: var(--surface);
+    overflow-y: auto;
+}
+
+.esai-rumus-judul {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.esai-rumus-medan {
+    min-height: 52px;
+    padding: 6px 10px;
+    border: 1px solid var(--essay-text);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 22px;
+}
+
+.esai-rumus-medan::part(menu-toggle) {
+    display: none;
+}
+
+.esai-rumus-alat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.esai-rumus-tombol {
+    min-width: 44px;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--opt-bg);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.esai-rumus-palet {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+}
+
+.esai-rumus-medan,
+.esai-rumus-judul,
+.esai-rumus-aksi,
+.esai-rumus-navigasi,
+.esai-rumus-tab {
+    flex-shrink: 0;
+}
+
+.esai-rumus-navigasi .esai-rumus-tombol {
+    min-width: 48px;
+}
+
+.esai-rumus-tab {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.esai-rumus-tab-tombol {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.esai-rumus-tab-tombol.aktif {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+}
+
+.esai-rumus-isi {
+    flex: 1 1 auto;
+    min-height: 88px;
+    overflow-y: auto;
+    padding: 2px;
+    align-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+}
+
+.esai-rumus-isi .esai-rumus-tombol {
+    height: auto;
+    min-height: 40px;
+    padding: 4px 8px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.esai-rumus-tombol.esai-rumus-tegak.aktif {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.esai-rumus-tombol .ML__latex {
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.esai-rumus-aksi {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.esai-rumus-aksi button {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.esai-rumus-batal {
+    border: 1px solid var(--border-strong);
+    background: var(--opt-bg);
+    color: var(--text);
+}
+
+.esai-rumus-hapus {
+    margin-right: auto;
+    border: 1px solid #c62828;
+    background: transparent;
+    color: #c62828;
+}
+
+.esai-rumus-sisip {
+    border: 0;
+    background: var(--primary);
+    color: #fff;
+}
+
+.esai-panel-alat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 12px 10px;
+}
+
+.esai-alat-tombol {
+    padding: 8px 12px;
+    border: 1px solid var(--essay-text);
+    border-radius: 10px;
+    background: var(--essay-bg);
+    color: var(--essay-text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.esai-alat-tombol.aktif {
+    background: var(--essay-text);
+    color: #fff;
+}
+
+.esai-papan {
+    flex: 1 1 auto;
+    min-height: 96px;
+    padding: 0 12px 12px;
+    border-top: 1px dashed var(--border);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.esai-papan-judul {
+    margin: 10px 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.esai-papan-grup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.esai-papan-grup.arab {
+    direction: rtl;
+}
+
+.esai-huruf {
+    min-width: 44px;
+    height: 44px;
+    padding: 0 6px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--opt-bg);
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1;
+}
+
+.esai-papan-huruf {
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.esai-papan-harakat {
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.esai-huruf.esai-harakat {
+    position: relative;
+    width: 44px;
+    padding: 0;
+}
+
+.esai-harakat i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -7px 0 0 -8px;
+    border: 1.6px dotted currentColor;
+    border-radius: 50%;
+    box-sizing: border-box;
+    opacity: 0.55;
+}
+
+.esai-harakat b {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font: 400 26px/1 "AZ Arab", "AZ Arab Pegon", serif;
+}
+
+.esai-harakat b.atas {
+    top: 7px;
+}
+
+.esai-harakat b.bawah {
+    top: 1px;
+}
+
+.esai-papan-bantu {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.esai-bantu {
+    flex: 1 1 0;
+    min-height: 40px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.esai-pesan {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.lencana-pelanggaran {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    border: 1px solid var(--warn-icon);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+}

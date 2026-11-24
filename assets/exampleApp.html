@@ -1,0 +1,547 @@
+<!doctype html>
+<html class="no-js" lang="en" >
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Az Zahra - CBT Application</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script>
+		/* Mode gelap dari aplikasi ("?theme=dark"), dipasang sebelum CSS dimuat agar tidak berkedip. */
+		if (/[?&]theme=dark\b/.test(location.search)) document.documentElement.className += ' dark';
+	</script>
+	<link href="fonts/opensans/opensans.css" rel="stylesheet" type="text/css">
+	<link href="Styles/fonts.css" rel="stylesheet" type="text/css">
+	<link href="Styles/aksara.css" rel="stylesheet" type="text/css">
+	<link href="Styles/main.css" rel="stylesheet" type="text/css">
+	<link href="Styles/modern.css" rel="stylesheet" type="text/css">
+	<link href="mathlive/mathlive-fonts.css" rel="stylesheet" type="text/css">
+	<link href="mathlive/mathlive-static.css" rel="stylesheet" type="text/css">
+	<link href="Styles/esai-ketik.css" rel="stylesheet" type="text/css">
+	<style>
+    .no-close .ui-dialog-titlebar-close {
+        display: none;
+    }
+    #log * {
+    	max-width:90vw;
+    	word-wrap: break-word;
+    }
+    .btn-group-sm>.btn, .btn-sm {
+		padding: 0.45rem 0.8rem;
+		font-size: .875rem;
+		line-height: 1.5;
+		border-radius: 0.2rem;
+	}
+</style>
+</head>
+<body ng-controller='ctrlApp' id='ctrlApp'>
+
+<main>
+
+	<header >
+		<nav class="navbar">
+			<div class="container">
+				<a class="navbar-brand" href="javascript:void(0)">Az Zahra - CBT APPLICATION</a>
+				<div class="pull-right bg-dark" >
+					<div class="access-panel">
+						<div class="ac-avatar"> </div>
+						<div class="ac-info" >
+							<span class="ac-welcome">Selamat Datang</span>
+							<span id="ac-name" class="ac-name" >???</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<div class="container">
+		<div  class="main-content">
+			<section class="page-section timer-section">
+				<div class="row">
+					<div class="col-xs-9">
+						<h1 class="page-label soal-label">NO <span class="soal-no" id="soal-no"  >0</span></h1>
+						<span id="lencana-pelanggaran" class="lencana-pelanggaran" role="status" style="display:none"></span>
+					</div>
+					<div class="col-xs-3">
+						<div class="widget-timer pull-right">
+							<div id="wg-timer" class="wg-countdown">
+								00:00
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="page-section main-section">
+
+				<div id="pnlSoal" style="border-color: #E0E0E0; border-style: Solid;font-size:14pt; width:100%;overflow-x: auto;">
+					<div class="Section1 fr-view">
+						<p style="margin-left: 0pt; margin-right: 0pt; margin-top: 0pt; margin-bottom: 0pt;">
+							<span style="font-family: 'Times New Roman'; font-size: 12pt;">&nbsp;</span>
+						</p>
+						<p style="margin-left: 0pt; margin-right: 0pt; margin-top: 0pt; margin-bottom: 0pt;
+                text-align: justify;">
+							<span id="log" style="font-family: 'Times New Roman'; font-size: 14pt; max-width:90vw">
+							
+							</span>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+
+</main>
+<script>
+
+	var mainbrigge;
+	var jodoh = [];
+	var jawabkategory = [];
+	window.onerror = function(err) {
+		console.log('window.onerror: ' + err)
+	}
+        function toggle(src) {
+        	src.parentElement.classList.toggle("open");
+        }
+        /* Tampilkan/sembunyikan opsi pasangan ke-[nomor] (nomor 1-based seperti yang disimpan di jodoh[]). */
+        function tampilkanOpsiJodoh(nomor, tampil) {
+        	if (!nomor) return;
+        	var boxes = document.getElementsByClassName("opjodoh" + (nomor - 1));
+        	for (const box of boxes) {
+        		box.style.display = tampil ? "block" : "none";
+        	}
+        }
+        function setJodoh(src,index,opsi,jawab) {
+        	/* jodoh[index] menyimpan nomor opsi 1-based, sedangkan class li "opjodohK" 0-based:
+        	   opsi lama dikembalikan dengan (nomor - 1) agar opsi yang benar muncul lagi. */
+        	tampilkanOpsiJodoh(jodoh[index], true);
+        	if(opsi == null){
+        		jodoh[index] = "";
+        		document.getElementById("jodoh"+index).innerHTML = "Pilih Jawaban";
+        	}else{
+				jodoh[index] = opsi+1;
+				tampilkanOpsiJodoh(jodoh[index], false);
+				document.getElementById("jodoh"+index).innerHTML = jawab;
+        	}
+			src.parentElement.parentElement.parentElement.classList.toggle("open");
+        	mainbrigge.callHandler('testJavaCallback', {'jawab': jodoh.join()}, function(response) {
+			})
+        }
+        function savetruefalse(jawaban) {
+        	if(jawaban == '1'){
+        		document.getElementById("opsiTrue").checked = true;
+        		document.getElementById("opsiFalse").checked = false;
+        	}else{
+        		document.getElementById("opsiTrue").checked = false;
+        		document.getElementById("opsiFalse").checked = true;
+        	}
+        	mainbrigge.callHandler('testJavaCallback', {'jawab': jawaban}, function(response) {
+			})
+        }
+        function savekategory(index,jawaban) {
+        	jawabkategory[index]=jawaban;
+        	mainbrigge.callHandler('testJavaCallback', {'jawab': jawabkategory.join()}, function(response) {
+			})
+        }
+        function savejawaban(jawaban) {
+        	mainbrigge.callHandler('testJavaCallback', {'jawab': jawaban}, function(response) {
+			})
+        }
+        function multiopsi(index,src) {
+        	if(src.src.indexOf("pilih.png") > 0){
+        		if(index == 0) document.getElementById("optionA").src = 'Images/optionA1.png';
+        		else if(index == 1) document.getElementById("optionB").src = 'Images/optionB1.png';
+        		else if(index == 2) document.getElementById("optionC").src = 'Images/optionC1.png';
+        		else if(index == 3) document.getElementById("optionD").src = 'Images/optionD1.png';
+        		else if(index == 4) document.getElementById("optionE").src = 'Images/optionE1.png';
+        	}else{
+        		src.src = "Images/pilih.png";
+        	}
+        	var jawab = [];
+        	if (document.getElementById("optionA") != null){
+                if(document.getElementById("optionA").src.indexOf("pilih.png") > 0) jawab[0]="1";
+                else jawab[0]="0";
+			}
+            if (document.getElementById("optionB") != null){
+                if(document.getElementById("optionB").src.indexOf("pilih.png") > 0) jawab[1]="1";
+                else jawab[1]="0";
+			}
+            if (document.getElementById("optionC") != null){
+                 if(document.getElementById("optionC").src.indexOf("pilih.png") > 0) jawab[2]="1";
+                else jawab[2]="0";
+			}
+            if (document.getElementById("optionD") != null){
+                if(document.getElementById("optionD").src.indexOf("pilih.png") > 0) jawab[3]="1";
+                else jawab[3]="0";
+			}
+            if (document.getElementById("optionE") != null){
+                if(document.getElementById("optionE").src.indexOf("pilih.png") > 0) jawab[4]="1";
+                else jawab[4]="0";
+			}
+        	mainbrigge.callHandler('testJavaCallback', {'jawab': jawab.join()}, function(response) {
+			})
+        }
+        function changeOnClick(src) {
+            if (document.getElementById("optionA") != null){
+                document.getElementById("optionA").src = 'Images/optionA1.png';
+				document.getElementById("optionA").parentElement.parentElement.style.backgroundColor ='';
+				}
+            if (document.getElementById("optionB") != null){
+                document.getElementById("optionB").src = 'Images/optionB1.png';
+				document.getElementById("optionB").parentElement.parentElement.style.backgroundColor ='';
+				}
+            if (document.getElementById("optionC") != null){
+                document.getElementById("optionC").src = 'Images/optionC1.png';
+				document.getElementById("optionC").parentElement.parentElement.style.backgroundColor ='';
+				}
+            if (document.getElementById("optionD") != null){
+                document.getElementById("optionD").src = 'Images/optionD1.png';
+				document.getElementById("optionD").parentElement.parentElement.style.backgroundColor ='';
+				}
+            if (document.getElementById("optionE") != null){
+                document.getElementById("optionE").src = 'Images/optionE1.png';
+				document.getElementById("optionE").parentElement.parentElement.style.backgroundColor ='';
+			}
+            src.src = 'Images/pilih.png';
+            var jawab = "";
+            switch (src.id) {
+			case "optionA":
+                jawab ="A";
+                break;
+            case "optionB":
+                jawab ="B";
+                break;
+            case "optionC":
+                jawab ="C";
+                break;
+            case "optionD":
+                jawab ="D";
+                break;
+            case "optionE":
+                jawab ="E";
+                break;
+            case "optionZ":
+                jawab ="Z";
+                break;
+            }
+
+            mainbrigge.callHandler('testJavaCallback', {'jawab': jawab}, function(response) {
+			})
+		}
+
+	function setupWebViewJavascriptBridge(callback) {
+		var bridge=window.WebViewJavascriptBridge||window.WKWebViewJavascriptBridge
+		if (bridge) { return callback(bridge); }
+		var callbacks=window.WVJBCallbacks||window.WKWVJBCallbacks
+		if (callbacks) { return callbacks.push(callback); }
+		window.WVJBCallbacks=window.WKWVJBCallbacks = [callback];
+		if(window.WKWebViewJavascriptBridge){
+		  window.webkit.messageHandlers.iOS_Native_InjectJavascript.postMessage(null)
+		}else{
+			var WVJBIframe = document.createElement('iframe');
+			WVJBIframe.style.display = 'none';
+			WVJBIframe.src = 'https://__bridge_loaded__';
+			document.documentElement.appendChild(WVJBIframe);
+			setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0)
+		}
+	}
+
+    setupWebViewJavascriptBridge(function(bridge) {
+    	mainbrigge = bridge;
+		var uniqueId = 1
+		function log(message, data) {
+			var log = document.getElementById('log');
+			log.innerHTML=data;
+			setTimeout(function(){
+
+				const tds = log.getElementsByTagName("td");
+				for (const td of tds) {
+					console.log("Update TD");
+					td.style.width = "";
+				}
+			},1000);
+			/*var el = document.createElement('div')
+			el.className = 'logLine'
+			el.innerHTML = uniqueId++ + '. ' + message + ':<br/>' + JSON.stringify(data)
+			if (log.children.length) { log.insertBefore(el, log.children[0]) }
+			else { log.appendChild(el) }*/
+		}
+		/* Lencana jumlah pelanggaran di kepala halaman (dari catatan di perangkat); tersembunyi bila 0. */
+		function tampilPelanggaran(jumlah) {
+			var lencana = document.getElementById('lencana-pelanggaran');
+			jumlah = parseInt(jumlah, 10) || 0;
+			if (!lencana) return;
+			lencana.style.display = jumlah > 0 ? '' : 'none';
+			lencana.textContent = 'Pelanggaran: ' + jumlah;
+			lencana.setAttribute('aria-label', jumlah + ' pelanggaran tercatat');
+		}
+		bridge.registerHandler('tampilPelanggaran', function(data, responseCallback) {
+			tampilPelanggaran(data && data['jumlah']);
+			if (responseCallback) responseCallback('ok');
+		})
+		/* Popup gambar soal (js/zoom-gambar.js): tombol daftar nomor disembunyikan selama popup terbuka. */
+		window.AZ_ZOOM_GAMBAR = window.AZ_ZOOM_GAMBAR || {};
+		window.AZ_ZOOM_GAMBAR.saatTerbuka = function (terbuka) {
+			bridge.callHandler('esaiPanel', {'terbuka': !!terbuka}, function () {});
+		};
+		/* Soal esai yang dijawab dengan mengetik (alat_jawab terisi): lihat js/esai-ketik.js. */
+		function pasangEsaiKetik(data) {
+			var wadah = document.getElementById('esaiKetikWadah');
+			if (!window.azEsaiKetik || data['type'] != "2" || !data['alat_jawab'] || !wadah) return;
+			var nomor = String(data['nomor']);
+			azEsaiKetik.izinBuka = function (lanjut) {
+				bridge.callHandler('esaiBolehKetik', {}, lanjut);
+			};
+			azEsaiKetik.saatTempel = function () {
+				bridge.callHandler('esaiTempel', {}, function () {});
+			};
+			azEsaiKetik.saatPanel = function (terbuka) {
+				bridge.callHandler('esaiPanel', {'terbuka': !!terbuka}, function () {});
+			};
+			azEsaiKetik.pasang({
+				wadah: wadah,
+				alat: data['alat_jawab'],
+				jawab: data['jawab'] || '',
+				nomor: nomor,
+				simpan: function (teks) {
+					bridge.callHandler('testJavaCallback', {'jawab': teks, 'nomor': nomor}, function () {});
+				}
+			});
+		}
+		bridge.registerHandler('sendTimeRemaining', function(data, responseCallback) {
+			document.getElementById("wg-timer").innerHTML=data['remaining'];
+			document.getElementById("ac-name").innerHTML=data['user_name'];
+			var responseData = { 'Javascript Says':'sendTimeRemaining success!' }
+			responseCallback(responseData)
+		})
+		bridge.registerHandler('testJavascriptHandler', function(data, responseCallback) {
+			/* Selalu membalas: aplikasi menganggap halaman macet bila tidak ada balasan (lalu memuat ulang halaman). */
+			try {
+			/* Jawaban esai yang belum terkirim disimpan dulu ke soal sebelumnya (membawa nomornya sendiri). */
+			if (window.azEsaiKetik) azEsaiKetik.lepas();
+			log('Java called testJavascriptHandler with', data['soal'])
+			document.getElementById("soal-no").innerHTML=data['nomor'];
+			tampilPelanggaran(data['pelanggaran']);
+			pasangEsaiKetik(data);
+			if(data['type'] == "8"){
+				/* Isian rumpang: kotak jawaban di dalam kalimat (js/isian-rumpang.js), jawaban JSON. */
+				if (window.azRumpang) azRumpang.pasang(document.getElementById('log'), data['jawab'] || '', savejawaban);
+			}
+			if(data['type'] == "7"){
+				jawabkategory = (data['jawab'] || '').split(",");
+				for(i=0; i<jawabkategory.length; i++){
+					var pilihanKategori = document.getElementById("opsi"+(i+1)+jawabkategory[i]);
+					if (pilihanKategori) pilihanKategori.checked=true;
+				}
+			}
+			else if(data['type'] == "6"){
+				jodoh = data['jawab'].split(",");
+				for(i=0; i<jodoh.length; i++){
+					if(jodoh[i] !== ""){
+						var select = jodoh[i]
+						boxes = document.getElementsByClassName("opjodoh"+(select-1));
+						for (const box of boxes) {
+							box.style.display = "none";
+						}
+						document.getElementById("jodoh"+i).innerHTML = boxes[0].innerText;
+					}
+				}
+			}else if(data['type'] == "5"){
+				if(data['jawab'] !== ""){
+					var jawaban = data['jawab'].split(",");
+					if (document.getElementById("optionA") != null){
+						if(jawaban[0] == "1") document.getElementById("optionA").src = 'Images/pilih.png';
+						else document.getElementById("optionA").src = 'Images/optionA1.png';
+					}
+					if (document.getElementById("optionB") != null){
+						if(jawaban[1] == "1") document.getElementById("optionB").src = 'Images/pilih.png';
+						else document.getElementById("optionB").src = 'Images/optionB1.png';
+						document.getElementById("optionB").parentElement.parentElement.style.backgroundColor ='';
+						}
+					if (document.getElementById("optionC") != null){
+						if(jawaban[2] == "1") document.getElementById("optionC").src = 'Images/pilih.png';
+						else document.getElementById("optionC").src = 'Images/optionC1.png';
+						document.getElementById("optionC").parentElement.parentElement.style.backgroundColor ='';
+						}
+					if (document.getElementById("optionD") != null){
+						if(jawaban[3] == "1") document.getElementById("optionD").src = 'Images/pilih.png';
+						else document.getElementById("optionD").src = 'Images/optionD1.png';
+						document.getElementById("optionD").parentElement.parentElement.style.backgroundColor ='';
+						}
+					if (document.getElementById("optionE") != null){
+						if(jawaban[4] == "1") document.getElementById("optionE").src = 'Images/pilih.png';
+						else document.getElementById("optionE").src = 'Images/optionE1.png';
+						document.getElementById("optionE").parentElement.parentElement.style.backgroundColor ='';
+					}
+				}else{
+
+				}
+			}else{
+				if (document.getElementById("optionA") != null){
+					if(data['jawab'] == "A") document.getElementById("optionA").src = 'Images/pilih.png';
+					else document.getElementById("optionA").src = 'Images/optionA1.png';
+					document.getElementById("optionA").parentElement.parentElement.style.backgroundColor ='';
+					}
+				if (document.getElementById("optionB") != null){
+					if(data['jawab'] == "B") document.getElementById("optionB").src = 'Images/pilih.png';
+					else document.getElementById("optionB").src = 'Images/optionB1.png';
+					document.getElementById("optionB").parentElement.parentElement.style.backgroundColor ='';
+					}
+				if (document.getElementById("optionC") != null){
+					if(data['jawab'] == "C") document.getElementById("optionC").src = 'Images/pilih.png';
+					else document.getElementById("optionC").src = 'Images/optionC1.png';
+					document.getElementById("optionC").parentElement.parentElement.style.backgroundColor ='';
+					}
+				if (document.getElementById("optionD") != null){
+					if(data['jawab'] == "D") document.getElementById("optionD").src = 'Images/pilih.png';
+					else document.getElementById("optionD").src = 'Images/optionD1.png';
+					document.getElementById("optionD").parentElement.parentElement.style.backgroundColor ='';
+					}
+				if (document.getElementById("optionE") != null){
+					if(data['jawab'] == "E") document.getElementById("optionE").src = 'Images/pilih.png';
+					else document.getElementById("optionE").src = 'Images/optionE1.png';
+					document.getElementById("optionE").parentElement.parentElement.style.backgroundColor ='';
+				}
+				if (document.getElementById("optionZ") != null){
+					if(data['jawab'] == "Z") document.getElementById("optionZ").src = 'Images/pilih.png';
+					else document.getElementById("optionZ").src = 'Images/none.png';
+					document.getElementById("optionZ").parentElement.parentElement.style.backgroundColor ='';
+				}
+			}
+			/* Isian berjawaban Arab: kotak kanan-ke-kiri + papan huruf Arab (penanda dari server). */
+			if (window.azIsianArab) azIsianArab.pasang(document.getElementById('log'));
+			} catch (galat) {
+				responseCallback({ ok: false, galat: String(galat && galat.message ? galat.message : galat) });
+				return;
+			}
+			responseCallback({ ok: true });
+		})
+
+
+	})
+	</script>
+
+
+<script>
+	/* Penanda status untuk tampilan (Styles/modern.css) tanpa selektor :has() agar tetap
+	   berfungsi di WebView lama. Hanya menambah/menghapus class; tidak mengubah jawaban. */
+	(function () {
+		var log = document.getElementById('log');
+		if (!log) return;
+		function toggle(el, name, on) {
+			if (on) el.classList.add(name); else el.classList.remove(name);
+		}
+		function closest(el, cls, tag) {
+			for (var n = el.parentNode; n && n !== log; n = n.parentNode) {
+				if (n.tagName === tag && n.classList.contains(cls)) return n;
+			}
+			return null;
+		}
+		/* Blok terdekat (p/li/div/td) yang hanya memuat satu gambar opsi. */
+		function blockOf(img) {
+			for (var n = img.parentNode; n && n !== log; n = n.parentNode) {
+				if (/^(P|LI|DIV|TD|H\d)$/.test(n.tagName)) {
+					return n.querySelectorAll('img[id^="option"]').length === 1 ? n : null;
+				}
+			}
+			return null;
+		}
+		/* Mode gelap: teks gelap, latar putih, dan garis hitam bawaan isi soal (mis. dari Word)
+		   diganti warna palet gelap. Warna lain (mis. merah untuk penekanan) dibiarkan. */
+		var dark = document.documentElement.classList.contains('dark');
+		function luma(c) {
+			var m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/.exec(c || '');
+			if (!m || (m[4] !== undefined && +m[4] < 0.1)) return null;
+			return (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255;
+		}
+		function darkFix() {
+			if (!dark) return;
+			var els = log.querySelectorAll('*:not([data-dk])');
+			for (var i = 0; i < els.length; i++) {
+				var el = els[i], cs = window.getComputedStyle(el);
+				el.setAttribute('data-dk', '1');
+				if (el.tagName === 'IMG') continue;
+				var t = luma(cs.color);
+				if (t !== null && t < 0.3) el.style.setProperty('color', 'var(--text)', 'important');
+				var b = luma(cs.backgroundColor);
+				if (b !== null && b > 0.75) el.style.setProperty('background-color', 'transparent', 'important');
+				if (parseFloat(cs.borderTopWidth) || parseFloat(cs.borderLeftWidth)) {
+					var bc = luma(cs.borderTopColor);
+					if (bc !== null && bc < 0.3) el.style.setProperty('border-color', 'var(--border-strong)', 'important');
+				}
+			}
+		}
+		function sync() {
+			darkFix();
+			var rows = log.querySelectorAll('tr.opsi-row');
+			for (var i = 0; i < rows.length; i++) {
+				var img = rows[i].querySelector('img[id^="option"]');
+				var cb = rows[i].querySelector('input[type="checkbox"]');
+				var on = (img && (img.getAttribute('src') || '').indexOf('pilih') >= 0) || (cb && cb.checked);
+				toggle(rows[i], 'terpilih', !!on);
+			}
+			var imgs = log.querySelectorAll('img[id^="option"]');
+			for (var m = 0; m < imgs.length; m++) {
+				if (closest(imgs[m], 'opsi-row', 'TR')) continue;
+				var box = blockOf(imgs[m]);
+				if (!box) continue;
+				box.classList.add('opsi-inline');
+				toggle(box, 'terpilih', (imgs[m].getAttribute('src') || '').indexOf('pilih') >= 0);
+			}
+			var kat = log.querySelectorAll('tr.kategori-row');
+			for (var k = 0; k < kat.length; k++) {
+				toggle(kat[k], 'terisi', !!kat[k].querySelector('input:checked'));
+			}
+			var jodoh = log.querySelectorAll('tr.jodoh-row');
+			for (var j = 0; j < jodoh.length; j++) {
+				var btn = jodoh[j].querySelector('.btn');
+				toggle(jodoh[j], 'terisi', !!btn && btn.textContent.replace(/\s+/g, ' ').trim() !== 'Pilih Jawaban');
+			}
+		}
+		if (window.MutationObserver) {
+			new MutationObserver(sync).observe(log, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['src', 'checked'] });
+		}
+		document.addEventListener('click', function () { setTimeout(sync, 0); }, true);
+		document.addEventListener('change', function () { setTimeout(sync, 0); }, true);
+		setInterval(sync, 1000);
+	})();
+</script>
+
+<script>
+	/* Ketuk di mana saja pada area pilihan jawaban (teks maupun kotaknya) = ketuk ikon hurufnya. Berlaku untuk PG biasa,
+	   PG kompleks, dan PG tetap (pilihan di dalam tabel/paragraf buatan guru): naik dari elemen yang diketuk sampai
+	   menemukan pembungkus yang berisi tepat satu ikon pilihan; bila lebih dulu bertemu pembungkus berisi dua ikon atau
+	   lebih (teks soal, baris berisi beberapa pilihan), tidak memilih apa pun. Gambar di dalam teks tetap membuka
+	   perbesaran; tautan dan isian tetap berfungsi seperti biasa. */
+	document.addEventListener('click', function (e) {
+		var t = e.target;
+		if (!t || !t.closest) return;
+		var wadah = t.closest('#log');
+		if (!wadah) return;
+		if (t.tagName === 'IMG' || t.closest('a, input, select, textarea, button, label, math-field')) return;
+		var el = t;
+		while (el && el !== wadah) {
+			var ikon = el.querySelectorAll ? el.querySelectorAll('img[id^="option"]') : [];
+			if (ikon.length > 1) return;
+			if (ikon.length === 1) {
+				/* Ikon yang dinonaktifkan (mis. halaman tinjau hasil memberi pointer-events: none) tidak boleh terpilih lewat baris. */
+				var gaya = window.getComputedStyle ? window.getComputedStyle(ikon[0]) : null;
+				if (gaya && gaya.pointerEvents === 'none') return;
+				if (typeof ikon[0].onclick === 'function') ikon[0].click();
+				return;
+			}
+			el = el.parentElement;
+		}
+	});
+</script>
+<style>tr.opsi-row { cursor: pointer; }</style>
+<script>window.AZ_MUAT_TABEL = { wadah: '#pnlSoal', skalaMinimum: 0.6 };</script>
+<script src="js/muat-tabel.js"></script>
+<script src="js/isian-rumpang.js"></script>
+<script>window.AZ_ZOOM_GAMBAR = window.AZ_ZOOM_GAMBAR || {}; window.AZ_ZOOM_GAMBAR.wadah = '#pnlSoal';</script>
+<script src="js/zoom-gambar.js"></script>
+<script src="js/aksara.js"></script>
+<script src="js/esai-tampil.js"></script>
+<script src="js/aksara-ketik.js"></script>
+<script src="js/esai-ketik.js"></script>
+</body>
+</html>

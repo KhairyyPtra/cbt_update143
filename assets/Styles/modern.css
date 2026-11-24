@@ -1,0 +1,642 @@
+/* ==========================================================================
+   Tampilan modern halaman soal (override main.css).
+   Hanya mengubah gaya; struktur HTML, ID, dan JavaScript tidak berubah.
+   ========================================================================== */
+
+/* Palet warna. Mode gelap aktif bila <html> ber-class "dark" (diset dari UjianActivity lewat
+   "?theme=dark" pada URL halaman). */
+:root {
+    --bg: #F9F5F1;
+    --surface: #FFFFFF;
+    --text: #251A12;
+    --text-muted: #6F6155;
+    --header: #C8571A;
+    --primary: #C8571A;
+    --primary-soft: #FCE6D6;
+    --on-primary-soft: #4A1E05;
+    --accent-text: #9E4111;
+    --opt-bg: #FBF8F5;
+    --border: #EADDD2;
+    --border-strong: #D8C8BA;
+    --warn-bg: #FFF1D6;
+    --warn-text: #8A5300;
+    --warn-icon: #D98207;
+    --essay-bg: #EFEAFF;
+    --essay-text: #7C5CFC;
+}
+
+html.dark {
+    --bg: #15110E;
+    --surface: #211A16;
+    --text: #EFE6DF;
+    --text-muted: #BFAEA2;
+    --header: #9E4111;
+    --primary: #E07535;
+    --primary-soft: #4A2614;
+    --on-primary-soft: #FFDCC6;
+    --accent-text: #FFB68A;
+    --opt-bg: #2A221D;
+    --border: #3D322A;
+    --border-strong: #54463C;
+    --warn-bg: #3A2A10;
+    --warn-text: #FFCF7A;
+    --warn-icon: #F2A93B;
+    --essay-bg: #2C2547;
+    --essay-text: #B9A6FF;
+    color-scheme: dark;
+}
+
+html, body {
+    background-color: var(--bg) !important;
+}
+
+body {
+    color: var(--text);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Header ---------- */
+header {
+    /* Model "Blok Warna": header warna solid */
+    background: var(--header) !important;
+    border-bottom: 0 !important;
+    border-radius: 0 0 22px 22px;
+    box-shadow: 0 6px 18px rgba(158, 65, 17, .22);
+}
+
+header .navbar {
+    min-height: 0;
+}
+
+header .navbar .bg-dark,
+header .navbar .bg-dark:before,
+header .access-panel {
+    background: transparent !important;
+}
+
+header .navbar .navbar-brand {
+    /* Avatar bulat berisi ikon aplikasi (pengganti logo teks) */
+    background: #FFFFFF url(../Images/app-icon.png) center center / cover no-repeat !important;
+    border: 2px solid rgba(255, 255, 255, .85);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
+    box-sizing: border-box;
+    height: 46px !important;
+    margin: 12px 0 12px 15px !important;
+    padding: 0 !important;
+    width: 46px !important;
+}
+
+header .access-panel {
+    padding: 12px 15px 12px 0 !important;
+}
+
+header .access-panel .ac-avatar {
+    background: rgba(255, 255, 255, .22) url(../Images/icon-student.png) center center / 70% auto no-repeat !important;
+    border-radius: 50%;
+    height: 42px !important;
+    width: 42px !important;
+}
+
+header .access-panel .ac-info span {
+    font-size: 1.15em !important;
+}
+
+header .access-panel .ac-info span.ac-welcome {
+    opacity: .8;
+}
+
+/* ---------- Nomor soal & timer ---------- */
+.main-content {
+    padding: 14px 4px 60px !important;
+}
+
+.page-section {
+    background-color: var(--surface) !important;
+    border-radius: 18px;
+    box-shadow: 0 1px 3px rgba(37, 26, 18, .08), 0 4px 14px rgba(37, 26, 18, .04);
+    margin-bottom: 12px !important;
+}
+
+/* Panel nomor soal & sisa waktu tetap menempel di atas layar saat soal panjang di-scroll */
+.page-section.timer-section {
+    padding: 12px 16px !important;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 8px;
+    z-index: 100;
+    /* bayangan pertama menutup celah di atas panel dengan warna latar halaman */
+    box-shadow: 0 -8px 0 0 var(--bg), 0 2px 6px rgba(37, 26, 18, .10), 0 8px 20px rgba(37, 26, 18, .08);
+}
+
+.page-label.soal-label {
+    color: var(--text-muted);
+    font-size: 1.5em !important;
+    letter-spacing: .5px;
+    line-height: 40px;
+    margin: 0 !important;
+}
+
+.soal-label .soal-no {
+    background: var(--primary) !important;
+    border-radius: 12px;
+    font-size: 1.15em;
+    line-height: 28px;
+    min-width: 44px;
+    padding: 6px 12px !important;
+    text-align: center;
+}
+
+.soal-label .soal-no.unsure {
+    background: #F59E0B !important;
+}
+
+.widget-timer {
+    background: transparent !important;
+    margin: 0 !important;
+}
+
+.widget-timer .wg-countdown {
+    background-color: var(--warn-bg) !important;
+    border-radius: 999px;
+    color: var(--warn-text) !important;
+    font-size: .95em;
+    letter-spacing: .5px;
+    line-height: 20px;
+    padding: 10px 14px 10px 34px !important;
+    position: relative;
+    white-space: nowrap;
+}
+
+/* ikon jam kecil di kiri timer */
+.widget-timer .wg-countdown:before {
+    border: 2px solid var(--warn-icon);
+    border-radius: 50%;
+    content: "";
+    height: 14px;
+    left: 13px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+}
+
+/* ---------- Isi soal ----------
+   Catatan: sengaja TIDAK memakai selektor :has() karena WebView lama (Chrome < 105) belum
+   mendukungnya. Penataan memakai class yang ditambahkan SoalHtmlBuilder (UjianActivity.kt);
+   status terpilih/terisi ditambahkan oleh skrip kecil di akhir exampleApp.html. */
+.page-section.main-section {
+    padding: 8px 6px !important;
+}
+
+#pnlSoal {
+    border: 0 !important;
+}
+
+#log {
+    color: var(--text);
+    display: block;
+    line-height: 1.6;
+    max-width: 100% !important;
+}
+
+#log img {
+    height: auto;
+    max-width: 100%;
+}
+
+/* Teks rata kanan-kiri membuat spasi antarkata renggang di layar sempit: jadikan rata kiri. */
+#pnlSoal p[style*="justify"],
+#log,
+#log [style*="justify"] {
+    text-align: left !important;
+}
+
+/* Gaya teks jawaban/pernyataan yang seragam */
+#log .opsi-teks,
+#log .jodoh-teks,
+#log .kategori-teks {
+    color: var(--text);
+    font-family: 'Times New Roman', 'Noto Serif', serif !important;
+    font-size: 17px !important;
+    line-height: 1.5 !important;
+    text-align: left !important;
+}
+
+#log .opsi-teks *,
+#log .jodoh-teks *,
+#log .kategori-teks * {
+    font-family: inherit !important;
+    line-height: inherit !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+    text-indent: 0 !important;
+}
+
+#log .opsi-teks *:not(sub):not(sup),
+#log .jodoh-teks *:not(sub):not(sup),
+#log .kategori-teks *:not(sub):not(sup) {
+    font-size: inherit !important;
+}
+
+/* Teks dari server sering berisi <p> di dalam <p> buatan aplikasi; paragraf kosong disembunyikan. */
+#log .opsi-teks p,
+#log .jodoh-teks p,
+#log .kategori-teks p {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+}
+
+#log .opsi-teks p:empty,
+#log .jodoh-teks p:empty,
+#log .kategori-teks p:empty,
+#log .jodoh-pilih > p:empty {
+    display: none !important;
+}
+
+#log .opsi-teks p + p {
+    margin-top: 6px !important;
+}
+
+/* ---------- Pilihan ganda, PG kompleks, essay, benar/salah: kartu bergaya penomoran ---------- */
+#log table.opsi-table {
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+
+#log tr.opsi-row {
+    background-color: var(--opt-bg);
+    display: table-row !important;
+}
+
+#log tr.opsi-row > td {
+    border-bottom: 1.5px solid var(--border) !important;
+    border-top: 1.5px solid var(--border) !important;
+    display: table-cell !important;
+    vertical-align: top !important;
+}
+
+/* Kolom huruf opsi / kotak centang */
+#log tr.opsi-row > td.opsi-huruf {
+    border-left: 1.5px solid var(--border) !important;
+    border-radius: 14px 0 0 14px;
+    padding: 12px 0 12px 12px !important;
+    width: 52px !important;
+}
+
+#log td.opsi-huruf p,
+#log td.opsi-huruf span {
+    display: block;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-indent: 0 !important;
+}
+
+/* main.css memberi margin 6px & min-height 38px pada gambar opsi; dinetralkan agar lingkaran
+   huruf sejajar tepat dengan baris pertama teks. */
+#pnlSoal #log img[id^="option"] {
+    display: inline-block;
+    height: 34px !important;
+    margin: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    width: 34px !important;
+}
+
+#pnlSoal #log tr.opsi-row img[id^="option"] {
+    display: block;
+}
+
+/* Opsi yang tertanam langsung di HTML soal dari server (opsi1-5 = 0), mis. paragraf Word
+   "<p style='text-indent:-21pt'><span><img id=optionA> (1)</span></p>". Class opsi-inline
+   ditambahkan skrip di exampleApp.html pada blok terdekat gambar opsi. */
+#log .opsi-inline {
+    background-color: var(--opt-bg);
+    border: 1.5px solid var(--border) !important;
+    border-radius: 14px;
+    box-sizing: border-box;
+    display: block;
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1.5 !important;
+    margin: 10px 0 !important;
+    min-height: 60px;
+    padding: 16px 14px 14px 58px !important;
+    position: relative;
+    text-align: left !important;
+    text-indent: 0 !important;
+}
+
+#log .opsi-inline * {
+    font-size: 17px !important;
+    line-height: 1.5 !important;
+    text-indent: 0 !important;
+}
+
+#pnlSoal #log .opsi-inline img[id^="option"] {
+    left: 12px;
+    position: absolute;
+    top: 12px;
+}
+
+#log .opsi-inline.terpilih {
+    background-color: var(--primary-soft);
+    border-color: var(--primary) !important;
+}
+
+/* Kolom teks opsi */
+#log tr.opsi-row > td.opsi-teks {
+    border-radius: 0 14px 14px 0;
+    border-right: 1.5px solid var(--border) !important;
+    padding: 16px 14px 14px 10px !important;
+    width: auto !important;
+}
+
+/* Status terpilih (class ditambahkan skrip di exampleApp.html) */
+#log tr.opsi-row.terpilih {
+    background-color: var(--primary-soft);
+}
+
+#log tr.opsi-row.terpilih > td {
+    border-color: var(--primary) !important;
+}
+
+/* Benar / salah */
+#log table.bs-table td.opsi-huruf {
+    padding: 14px 0 12px 14px !important;
+}
+
+#log table.bs-table td.opsi-teks {
+    font-weight: 600;
+}
+
+/* Petunjuk kecil (PG kompleks, menjodohkan) */
+#log .soal-petunjuk,
+#log .soal-petunjuk * {
+    color: var(--text-muted) !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+}
+
+/* ---------- Essay: label "ESSAY" kecil & petunjuk menjadi kotak info ---------- */
+#log p.essay-label {
+    margin: 0 0 10px !important;
+}
+
+#log p.essay-label > font {
+    background: var(--essay-bg);
+    border-radius: 999px;
+    color: var(--essay-text) !important;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 4px 14px;
+}
+
+#log p.essay-hint {
+    background: var(--warn-bg);
+    border-left: 4px solid #F59E0B;
+    border-radius: 12px;
+    padding: 10px 14px !important;
+}
+
+#log p.essay-hint,
+#log p.essay-hint * {
+    color: var(--warn-text) !important;
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+}
+
+/* ---------- Isian singkat: label di atas, kolom jawaban lebar ---------- */
+#log table.isian-table,
+#log table.isian-table tbody,
+#log tr.isian-row,
+#log tr.isian-row > td {
+    display: block !important;
+    width: 100% !important;
+}
+
+#log tr.isian-row > td {
+    padding: 0 !important;
+}
+
+#log td.isian-label {
+    color: var(--text-muted);
+    font-family: inherit !important;
+    font-size: 14px !important;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+#log input.form-control {
+    background: var(--opt-bg);
+    border: 1.5px solid var(--border-strong);
+    border-radius: 12px;
+    box-sizing: border-box;
+    color: var(--text);
+    font-size: 18px !important;
+    height: 54px !important;
+    padding: 8px 12px;
+    width: 100% !important;
+}
+
+#log input.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(200, 87, 26, .15);
+    outline: none;
+}
+
+/* ---------- Menjodohkan: pernyataan di atas, tombol pilihan selebar kartu ---------- */
+#log table.jodoh-table,
+#log table.jodoh-table tbody,
+#log tr.jodoh-row,
+#log tr.jodoh-row > td {
+    display: block !important;
+    width: 100% !important;
+}
+
+#log tr.jodoh-row {
+    background: var(--opt-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+}
+
+#log tr.jodoh-row.terisi {
+    border-color: var(--primary);
+}
+
+#log tr.jodoh-row > td {
+    padding: 0 !important;
+}
+
+#log td.jodoh-teks p {
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+}
+
+#log .dropdown {
+    position: relative;
+    width: 100%;
+}
+
+#log .dropdown .btn {
+    background: var(--surface) !important;
+    border: 1.5px solid var(--primary) !important;
+    border-radius: 12px !important;
+    color: var(--primary) !important;
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-weight: 700;
+    min-height: 46px;
+    padding: 10px 40px 10px 14px !important;
+    position: relative;
+    text-align: left;
+    white-space: normal;
+    width: 100%;
+}
+
+/* panah kecil penanda dropdown */
+#log .dropdown .btn:after {
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--primary);
+    content: "";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#log .dropdown.open .btn,
+#log tr.jodoh-row.terisi .btn {
+    background: var(--primary-soft) !important;
+}
+
+#log .dropdown-menu {
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(37, 26, 18, .18);
+    left: 0;
+    margin-top: 6px;
+    min-width: 100%;
+    padding: 6px 0;
+    z-index: 50;
+}
+
+#log .dropdown-menu > li > a {
+    color: var(--text);
+    font-size: 15px;
+    padding: 12px 16px;
+    white-space: normal;
+}
+
+#log .dropdown-menu > li > a:active,
+#log .dropdown-menu > li > a:hover {
+    background: var(--primary-soft);
+}
+
+/* ---------- Kategori: tabel lembut dengan tombol radio ---------- */
+#log div.kategori-wrap {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow-x: auto !important;
+}
+
+#log table.kategori-table {
+    border: 0 !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    margin: 0;
+    width: 100%;
+}
+
+#log table.kategori-table th {
+    background: var(--primary-soft) !important;
+    border: 0 !important;
+    border-bottom: 1.5px solid var(--border-strong) !important;
+    padding: 10px 8px;
+}
+
+#log table.kategori-table th,
+#log table.kategori-table th * {
+    color: var(--on-primary-soft) !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    font-weight: 700;
+    margin: 0 !important;
+}
+
+#log table.kategori-table td {
+    border: 0 !important;
+    border-top: 1px solid var(--border) !important;
+    padding: 10px 8px !important;
+    vertical-align: middle;
+}
+
+#log table.kategori-table td + td,
+#log table.kategori-table th + th {
+    border-left: 1px solid var(--border) !important;
+    text-align: center;
+    width: 64px;
+}
+
+#log tr.kategori-row.terisi td.kategori-teks {
+    color: var(--accent-text) !important;
+}
+
+#log small.soal-catatan {
+    color: var(--text-muted) !important;
+    display: block;
+    font-family: inherit;
+    margin-top: 8px;
+}
+
+/* ---------- Kontrol ---------- */
+#log input[type="checkbox"],
+#log input[type="radio"] {
+    accent-color: var(--primary);
+    height: 22px;
+    margin: 0;
+    width: 22px;
+}
+
+/* ---------- Mode gelap: penyesuaian isi soal dari server ----------
+   Warna teks gelap, latar putih, dan garis hitam bawaan soal (mis. dari Word) diganti oleh skrip
+   di akhir exampleApp.html; aturan di sini menangani elemen yang tidak bergantung pada skrip. */
+html.dark .dropdown-menu {
+    background: var(--surface);
+}
+
+html.dark #log .dropdown-menu > li > a {
+    color: var(--text);
+}
+
+html.dark #log .dropdown-menu > li > a:active,
+html.dark #log .dropdown-menu > li > a:hover {
+    background: var(--primary-soft);
+}
+
+/* Gambar soal (sering transparan bergaris hitam) diberi alas putih agar tetap terbaca. */
+html.dark #log img:not([id^="option"]) {
+    background: #FFFFFF;
+    border-radius: 6px;
+}
+
+/* Lingkaran huruf opsi putih dibuat gelap; gambar centang (pilih.png) tetap aslinya. */
+html.dark #pnlSoal #log img[id^="option"]:not([src*="pilih"]) {
+    filter: invert(.88) hue-rotate(180deg);
+}
+
+html.dark #log input.form-control {
+    color: var(--text);
+}

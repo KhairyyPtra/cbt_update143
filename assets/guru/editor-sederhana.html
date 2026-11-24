@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="../Styles/aksara.css">
+<style>
+:root{--latar:#ffffff;--teks:#251a12;--garis:#d8c8ba;--aksen:#c8571a;--redup:#6f6155;--tombol:#f9f5f1}
+html,body{margin:0;background:var(--latar);color:var(--teks);font-family:"Roboto",system-ui,sans-serif;font-size:17px}
+.alat{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:var(--tombol);border-bottom:1px solid var(--garis)}
+.alat button{min-width:40px;height:40px;padding:0 10px;border:1px solid var(--garis);border-radius:8px;background:#fff;color:var(--teks);font-size:16px}
+.alat button:active{background:#fce6d6;border-color:var(--aksen)}
+.alat .pemisah{width:1px;background:var(--garis);margin:4px 2px}
+#isi{min-height:60vh;padding:14px 16px 80px;outline:none;line-height:1.6;word-wrap:break-word}
+#isi:empty:before{content:attr(data-petunjuk);color:var(--redup)}
+#isi img{max-width:100%;height:auto}
+#isi table{border-collapse:collapse;max-width:100%}
+#isi td,#isi th{border:1px solid #999;padding:4px 8px;min-width:32px}
+.az-arab-teks{font-family:"AZ Arab",serif}
+</style>
+</head>
+<body>
+<div class="alat" id="alat">
+  <button type="button" data-perintah="bold" aria-label="Tebal"><b>B</b></button>
+  <button type="button" data-perintah="italic" aria-label="Miring"><i>I</i></button>
+  <button type="button" data-perintah="underline" aria-label="Garis bawah"><u>U</u></button>
+  <button type="button" data-perintah="superscript" aria-label="Pangkat atas">x²</button>
+  <button type="button" data-perintah="subscript" aria-label="Pangkat bawah">x₂</button>
+  <span class="pemisah"></span>
+  <button type="button" data-perintah="insertUnorderedList" aria-label="Daftar berpoin">•≡</button>
+  <button type="button" data-perintah="insertOrderedList" aria-label="Daftar bernomor">1≡</button>
+  <span class="pemisah"></span>
+  <button type="button" id="tblTabel" aria-label="Sisipkan tabel">Tabel</button>
+  <button type="button" id="tblBaris" aria-label="Tambah baris tabel">+Baris</button>
+  <button type="button" id="tblKolom" aria-label="Tambah kolom tabel">+Kolom</button>
+  <button type="button" id="tblGambar" aria-label="Sisipkan gambar">Gambar</button>
+  <button type="button" id="tblArab" aria-label="Tandai teks Arab (kanan ke kiri)">عربي</button>
+  <span class="pemisah"></span>
+  <button type="button" data-perintah="undo" aria-label="Urungkan">↶</button>
+  <button type="button" data-perintah="redo" aria-label="Ulangi">↷</button>
+</div>
+<div id="isi" contenteditable="true" data-petunjuk="Tulis di sini…"></div>
+<script>
+(function () {
+  var isi = document.getElementById('isi');
+  var simpanan = null;
+
+  function ingatSeleksi() {
+    var sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && isi.contains(sel.anchorNode)) {
+      simpanan = sel.getRangeAt(0).cloneRange();
+    }
+  }
+
+  function pulihkanSeleksi() {
+    isi.focus();
+    if (!simpanan) return;
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(simpanan);
+  }
+
+  function sel_td() {
+    var sel = window.getSelection();
+    var node = sel && sel.anchorNode;
+    while (node && node !== isi) {
+      if (node.nodeName === 'TD' || node.nodeName === 'TH') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  document.addEventListener('selectionchange', ingatSeleksi);
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-perintah]'), function (tombol) {
+    tombol.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    tombol.addEventListener('click', function () {
+      pulihkanSeleksi();
+      document.execCommand(tombol.getAttribute('data-perintah'), false, null);
+    });
+  });
+
+  document.getElementById('tblTabel').addEventListener('click', function () {
+    pulihkanSeleksi();
+    var html = '<table><tbody>';
+    for (var r = 0; r < 3; r++) {
+      html += '<tr>';
+      for (var c = 0; c < 3; c++) html += '<td>&nbsp;</td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table><p><br></p>';
+    document.execCommand('insertHTML', false, html);
+  });
+
+  document.getElementById('tblBaris').addEventListener('click', function () {
+    var td = sel_td();
+    if (!td) return;
+    var tr = td.parentNode;
+    var baru = tr.cloneNode(true);
+    Array.prototype.forEach.call(baru.children, function (sel) { sel.innerHTML = '&nbsp;'; });
+    tr.parentNode.insertBefore(baru, tr.nextSibling);
+  });
+
+  document.getElementById('tblKolom').addEventListener('click', function () {
+    var td = sel_td();
+    if (!td) return;
+    var indeks = Array.prototype.indexOf.call(td.parentNode.children, td);
+    var tabel = td.closest('table');
+    Array.prototype.forEach.call(tabel.querySelectorAll('tr'), function (tr) {
+      var sel = document.createElement(tr.children[0] && tr.children[0].nodeName === 'TH' ? 'th' : 'td');
+      sel.innerHTML = '&nbsp;';
+      var acuan = tr.children[indeks];
+      if (acuan) tr.insertBefore(sel, acuan.nextSibling); else tr.appendChild(sel);
+    });
+  });
+
+  document.getElementById('tblGambar').addEventListener('mousedown', function (e) { e.preventDefault(); });
+  document.getElementById('tblGambar').addEventListener('click', function () {
+    ingatSeleksi();
+    if (window.Azedit) window.Azedit.pilihGambar();
+  });
+
+  document.getElementById('tblArab').addEventListener('mousedown', function (e) { e.preventDefault(); });
+  document.getElementById('tblArab').addEventListener('click', function () {
+    pulihkanSeleksi();
+    var sel = window.getSelection();
+    var teks = sel ? sel.toString() : '';
+    var html = '<span class="az-arab-teks" dir="rtl" style="font-family: \'AZ Arab\', serif; font-size: 28px;">' +
+      (teks ? teks.replace(/&/g, '&amp;').replace(/</g, '&lt;') : '&#8207;') + '</span>&nbsp;';
+    document.execCommand('insertHTML', false, html);
+  });
+
+  window.aturIsi = function (html, dasar, petunjuk) {
+    if (dasar) {
+      var base = document.querySelector('base') || document.createElement('base');
+      base.href = dasar;
+      document.head.appendChild(base);
+    }
+    if (petunjuk) isi.setAttribute('data-petunjuk', petunjuk);
+    isi.innerHTML = html || '';
+    isiAwal = window.ambilIsi();
+  };
+
+  var isiAwal = null;
+
+  window.adaPerubahan = function () {
+    if (isiAwal === null) return false;
+    return window.ambilIsi() !== isiAwal;
+  };
+
+  function aman(teks) {
+    return String(teks).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  window.sisipGambar = function (url, src) {
+    pulihkanSeleksi();
+    var html = '<img src="' + aman(url) + '"' + (src ? ' data-az-src="' + aman(src) + '"' : '') + '>';
+    document.execCommand('insertHTML', false, html);
+  };
+
+  window.ambilIsi = function () {
+    var salinan = isi.cloneNode(true);
+    Array.prototype.forEach.call(salinan.querySelectorAll('img'), function (img) {
+      var simpanan = img.getAttribute('data-az-src');
+      if (simpanan) {
+        img.setAttribute('src', simpanan);
+        img.removeAttribute('data-az-src');
+        return;
+      }
+      var asli = img.getAttribute('src') || '';
+      var dasar = document.querySelector('base');
+      if (dasar && asli.indexOf(dasar.href) === 0) img.setAttribute('src', asli.substring(dasar.href.length));
+    });
+    var html = salinan.innerHTML;
+    if (html === '<br>' || html === '<p><br></p>') html = '';
+    return html;
+  };
+})();
+</script>
+</body>
+</html>
